@@ -4,5 +4,5 @@
 
 # - - - SET SOME STUFF FIRST...
 
-commands="{install,remove,update,list}"
+_CMD="{install,remove,update,list}"
 
