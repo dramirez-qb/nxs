@@ -1,8 +1,38 @@
-#! /bin/bash
+#! /bin/sh
 
 # Luis Lavaire 2017, @Nitrux S.A.
 
 # - - - SET SOME STUFF FIRST...
 
-_CMD="{install,remove,update,list}"
+_error() {
+	echo -e " - - - \033[38;5;1m $@ \n"
+}
 
+_success() {
+	echo -e " - - - \033[38;5;5m $@ \n"
+}
+
+_add() {
+	[ "$@" ] || _error "Nothing to install"
+}
+
+_del() {
+	echo del
+}
+
+_sy() {
+	echo sy
+}
+
+_ls() {
+	echo ls
+}
+
+while getopts "i:r:u:l" cmd; do
+	case "$cmd" in
+		"i") shift; _add $@;;
+		"r") shift; _del $@;;
+		"u") shift; _sy $@;;
+		"l") shift; _ls $@;;
+	esac
+done
