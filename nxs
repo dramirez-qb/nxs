@@ -2,7 +2,22 @@
 
 # Luis Lavaire 2017, @Nitrux S.A.
 
-# - - - SET SOME STUFF FIRST...
+# nxs is a simple software installer designed to manage
+# AppImage packages. When install es requested, it looks
+# for the requested package in local database, and, if
+# found, then it installs it (downloads) in 
+# $HOME/.local/apps.
+#
+# When deletion is requested, it looks if the app exists
+# in the apps directory and if so, it just deletes it.
+#
+# It can update all the packages installed to the latest
+# version available also. List the ones installed or
+# available for installation is supported too.
+#
+# Very easy, very funny. =D
+
+# - - - FORMAT OUTPUT
 
 _error() {
 	echo -e " - - - \033[38;5;1m $@ \n"
@@ -11,6 +26,8 @@ _error() {
 _success() {
 	echo -e " - - - \033[38;5;5m $@ \n"
 }
+
+# - - - MAIN FUNCTIONS
 
 _add() {
 	[ "$@" ] || _error "Nothing to install"
@@ -28,11 +45,13 @@ _ls() {
 	echo ls
 }
 
+# - - - PARSE COMMAND LINE
+
 while getopts "i:r:u:l" cmd; do
 	case "$cmd" in
 		"i") shift; _add $@;;
 		"r") shift; _del $@;;
-		"u") shift; _sy $@;;
-		"l") shift; _ls $@;;
+		"u") shift; _sy $OPTARG;;
+		"l") shift; _ls $OPTARG;;
 	esac
 done
