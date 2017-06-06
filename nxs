@@ -3,7 +3,7 @@
 # Luis Lavaire 2017, @Nitrux S.A.
 
 # nxs is a simple software installer designed to manage
-# AppImage packages. When install es requested, it looks
+# AppImage packages. When install is requested, it looks
 # for the requested package in local database, and, if
 # found, then it installs it (downloads) in 
 # $HOME/.local/apps.
