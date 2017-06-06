@@ -20,22 +20,29 @@
 
 # - - - 		FORMAT OUTPUT
 
-_fail() { echo -e " - - - \033[38;5;1m $@ \n"; }
+_fail() { printf "\v - - \033[38;5;1m $@ \v"; }
 
-_fine() { echo -e " - - - \033[38;5;5m $@ \n"; }
+_fine() { printf "\v - - \033[38;5;5m $@ \v"; }
 
 
 # - - - 		CONFIG FILES
 
-_DB="${HOME}/.apps/.nxdb"
+_DB=".apps/.nxdb"
 
 # - - - 		MAIN FUNCTIONS
 
-_add() {
-	[ "$@" ] || _fail "Nothing to install"
+_help() {
+	_fine	"USAGE: nxs [ -s PKG ] [ -r PKG ] [ -u PKG ] [ -l ]\nyou must specify at least one argument"
 
+	[ "$1" ] && _fine `cat << EOF
+		
+	`
+	exit 1
+}
+
+_add() {
 	for pkg in "$@"; do
-		target=`grep "$pkg" "$_DB"`
+		target=`grep "$pkg" "$_DB" | `
 	done
 }
 
@@ -48,11 +55,13 @@ _sy() {
 }
 
 _ls() {
-	awk '{print $1}' "$_DB" | sort | uniq
+	fineawk '{print $1}' "$_DB" | sort | uniq
 }
 
 
 # - - - 		PARSE COMMAND LINE
+
+[ ! "$1" ] && _help
 
 while getopts "i:r:u:l" cmd; do
 	case "$cmd" in
@@ -60,5 +69,6 @@ while getopts "i:r:u:l" cmd; do
 		"r") _del $@;;
 		"u") _sy $OPTARG;;
 		"l") _ls $OPTARG;;
+		*) _help;;
 	esac
 done
