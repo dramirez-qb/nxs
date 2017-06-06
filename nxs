@@ -17,20 +17,22 @@
 #
 # Very easy, very funny. =D
 
-# - - - FORMAT OUTPUT
 
-_error() {
-	echo -e " - - - \033[38;5;1m $@ \n"
-}
+# - - - 		FORMAT OUTPUT
 
-_success() {
-	echo -e " - - - \033[38;5;5m $@ \n"
-}
+_fail() { echo -e " - - - \033[38;5;1m $@ \n"; }
 
-# - - - MAIN FUNCTIONS
+_fine() { echo -e " - - - \033[38;5;5m $@ \n"; }
+
+
+# - - - 		MAIN FUNCTIONS
 
 _add() {
-	[ "$@" ] || _error "Nothing to install"
+	[ "$@" ] || _fail "Nothing to install"
+
+	for pkg in "$@"; do
+		grep "$pkg" "$_DB"
+	done
 }
 
 _del() {
@@ -45,13 +47,14 @@ _ls() {
 	echo ls
 }
 
-# - - - PARSE COMMAND LINE
+
+# - - - 		PARSE COMMAND LINE
 
 while getopts "i:r:u:l" cmd; do
 	case "$cmd" in
-		"i") shift; _add $@;;
-		"r") shift; _del $@;;
-		"u") shift; _sy $OPTARG;;
-		"l") shift; _ls $OPTARG;;
+		"i") _add $@;;
+		"r") _del $@;;
+		"u") _sy $OPTARG;;
+		"l") _ls $OPTARG;;
 	esac
 done
