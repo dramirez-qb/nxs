@@ -25,13 +25,17 @@ _fail() { echo -e " - - - \033[38;5;1m $@ \n"; }
 _fine() { echo -e " - - - \033[38;5;5m $@ \n"; }
 
 
+# - - - 		CONFIG FILES
+
+_DB="$HOME/.apps/.nxdb"
+
 # - - - 		MAIN FUNCTIONS
 
 _add() {
 	[ "$@" ] || _fail "Nothing to install"
 
 	for pkg in "$@"; do
-		grep "$pkg" "$_DB"
+		`grep "$pkg" "$_DB"`
 	done
 }
 
