@@ -48,7 +48,7 @@ _sy() {
 }
 
 _ls() {
-	echo ls
+	awk '{print $1}' "$_DB" | sort | uniq
 }
 
 
