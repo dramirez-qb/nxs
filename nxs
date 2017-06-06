@@ -48,7 +48,11 @@ _sy() {
 }
 
 _ls() {
+<<<<<<< HEAD
 	
+=======
+	awk '{print $1}' "$_DB" | sort | uniq
+>>>>>>> 2a2cbc0cae42075647efb78120348b104ccc5419
 }
 
 
