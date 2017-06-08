@@ -20,9 +20,9 @@
 
 # - - - 		FORMAT OUTPUT
 
-_fail() { echo -e "\v - - \033[38;5;1m $@ \n\n"; }
+_fail() { echo -e "\n - - \033[38;5;1m $@ \n"; }
 
-_echo() { echo -e "\v - - \033[38;5;5m $@ \n\n"; }
+_echo() { echo -e "\n - - \033[38;5;5m $@ \n"; }
 
 
 # - - - 		CONFIG FILES
@@ -32,7 +32,7 @@ _DB=".apps/.nxdb"
 # - - - 		MAIN FUNCTIONS
 
 _help() {
-	_echo "USAGE: nxs [ -s PKG ] [ -r PKG ] [ -u PKG ] [ -l ]\nyou must specify at least one argument"
+	_echo "USAGE: nxs - [s] [r] [u] [l] PKG \n You must specify at least one argument"
 
 	[ "$1" ] && cat << EOF
 		9
