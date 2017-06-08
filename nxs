@@ -20,9 +20,9 @@
 
 # - - - 		FORMAT OUTPUT
 
-_fail() { printf "\v - - \033[38;5;1m $@ \v"; }
+_fail() { echo -e "\v - - \033[38;5;1m $@ \n\n"; }
 
-_fine() { printf "\v - - \033[38;5;5m $@ \v"; }
+_echo() { echo -e "\v - - \033[38;5;5m $@ \n\n"; }
 
 
 # - - - 		CONFIG FILES
@@ -32,22 +32,22 @@ _DB=".apps/.nxdb"
 # - - - 		MAIN FUNCTIONS
 
 _help() {
-	_fine	"USAGE: nxs [ -s PKG ] [ -r PKG ] [ -u PKG ] [ -l ]\nyou must specify at least one argument"
+	_echo "USAGE: nxs [ -s PKG ] [ -r PKG ] [ -u PKG ] [ -l ]\nyou must specify at least one argument"
 
-	[ "$1" ] && _fine `cat << EOF
-		
-	`
+	[ "$1" ] && cat << EOF
+		9
+EOF
 	exit 1
 }
 
 _add() {
 	for pkg in "$@"; do
-		target=`grep "$pkg" "$_DB" | `
+		target=`grep "$pkg" "$_DB" | awk '{ print $1 }'`
 	done
 }
 
 _del() {
-	echo del
+	
 }
 
 _sy() {
@@ -55,7 +55,10 @@ _sy() {
 }
 
 _ls() {
-	fineawk '{print $1}' "$_DB" | sort | uniq
+	awk '{ print $1 }' "$_DB" | sort | uniq
+
+	# TODO
+	# Be able to look up for [ STR ] in the database.
 }
 
 
