@@ -17,6 +17,13 @@
 #
 # Very easy, very funny. =D
 
+# - - - 		CONFIG FILES
+
+# ${HOME}/.apps
+
+_DB=".apps/.nxdb"
+_APPS_DIR=".apps"
+
 
 # - - - 		FORMAT OUTPUT
 
@@ -25,24 +32,20 @@ _fail() { echo -e "\n - - \033[38;5;1m $@ \n"; }
 _echo() { echo -e "\n - - \033[38;5;5m $@ \n"; }
 
 
-# - - - 		CONFIG FILES
-
-_DB=".apps/.nxdb"
-
 # - - - 		MAIN FUNCTIONS
 
-_help() {
-	_echo "USAGE: nxs - [s] [r] [u] [l] PKG \n You must specify at least one argument"
-
-	[ "$1" ] && cat << EOF
-		9
-EOF
-	exit 1
-}
+_help() { _echo "USAGE: nxs - [s] [r] [u] [l] PKG"; }
 
 _add() {
 	for pkg in "$@"; do
-		target=`grep "$pkg" "$_DB" | awk '{ print $1 }'`
+		target=`grep "$pkg" "$_DB" >/dev/null 2>&1`
+		[ -z "$target" ] && { _echo "The name '$pkg' was not found in the database. Exiting"; exit; }
+	done
+
+	for pkg in "$@"; do
+		target=`grep "$pkg" "$_DB" | awk '{ print $3 }'`
+		app=`grep "$pkg" "$_DB" | awk '{ print $1 }'`
+		wget $target -O "${_APPS_DIR}/${app}.ai"
 	done
 }
 
@@ -55,10 +58,9 @@ _sy() {
 }
 
 _ls() {
-	awk '{ print $1 }' "$_DB" | sort | uniq
-
-	# TODO
-	# Be able to look up for [ STR ] in the database.
+	[ -z "$@" ] && { awk '{ print $1 }' "$_DB" | sort | uniq } || {
+		
+	}
 }
 
 
