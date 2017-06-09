@@ -46,16 +46,21 @@ _help() {
 
 _add() {
 	for pkg in "$@"; do
-		target=$(grep "$pkg" "$_DB")
+		target=$(awk "/$pkg/ { print \$1,\$2 }" "$_DB")
+		echo $target
 		[[ -z "$target" ]] && { _echo "The name '$pkg' is not valid. Exiting"; }
+		target="${target/ /-}"
 		app="${target/ */}"
 		target="${target/* /}"
-		wget -nv $target -qO "${_APPS_DIR}/${app}.x"
+		_echo "Installing ${app}..."
+#		wget $target -qO "${_APPS_DIR}/${app}.x"
+#		chmod a+x "${_APPS_DIR}/${app}.x"
 	done
+	_echo "Done installing apps."
 }
 
 _del() {
-	echo 1	
+	echo 1
 }
 
 _sy() {
@@ -75,9 +80,7 @@ _ls() {
 
 mkdir -p "$_APPS_DIR"
 [ -f "$_DB" ] || wget "$_NXDB" -qO "$_DB"
-
 [ ! "$1" ] && _help
-
 cmd=`tr [:upper:] [:lower:] <<< $1`
 
 shift
