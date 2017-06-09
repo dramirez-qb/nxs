@@ -44,17 +44,28 @@ _help() {
 	exit
 }
 
+_install() {
+	target="${target/ /-}"
+	app="${target/ */}"
+	target="${target/* /}"
+	_echo "Installing ${app}..."
+	wget $target -qO "${_APPS_DIR}/${app}.x"
+	chmod a+x "${_APPS_DIR}/${app}.x"
+}
+
 _add() {
 	for pkg in "$@"; do
-		target=$(awk "/$pkg/ { print \$1,\$2 }" "$_DB")
-		echo $target
-		[[ -z "$target" ]] && { _echo "The name '$pkg' is not valid. Exiting"; }
-		target="${target/ /-}"
-		app="${target/ */}"
-		target="${target/* /}"
-		_echo "Installing ${app}..."
-#		wget $target -qO "${_APPS_DIR}/${app}.x"
-#		chmod a+x "${_APPS_DIR}/${app}.x"
+		target=($(awk "/$pkg/ { print \$1,\$2 }" "$_DB"))
+
+		if [[ `wc -l <<< "$target"` -ge 1 ]]; then
+			for  in "${target[@]}"; do
+				app="$"
+				ver="$"
+				_install "$app" "$ver"
+			done
+		else
+			_echo "The name '$pkg' is not valid. Exiting"
+		fi
 	done
 	_echo "Done installing apps."
 }
