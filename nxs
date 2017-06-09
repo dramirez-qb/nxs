@@ -38,28 +38,31 @@ _help() { _echo "USAGE: nxs - [s] [r] [u] [l] PKG"; }
 
 _add() {
 	for pkg in "$@"; do
-		target=`grep "$pkg" "$_DB" >/dev/null 2>&1`
-		[ -z "$target" ] && { _echo "The name '$pkg' was not found in the database. Exiting"; exit; }
+#		target=$(grep "$pkg" "$_DB" >/dev/null 2>&1)
+#		[[ -z "$target" ]] && { _echo "The name '$pkg' is not valid. Exiting"; exit; }
+		echo '$@:' "$@"
 	done
 
 	for pkg in "$@"; do
+		echo 2
 		target=`grep "$pkg" "$_DB" | awk '{ print $3 }'`
-		app=`grep "$pkg" "$_DB" | awk '{ print $1 }'`
-		wget $target -O "${_APPS_DIR}/${app}.ai"
+		app="${target##*}"
+		echo $app
+#		wget $target -O "${_APPS_DIR}/${app}.ai"
 	done
 }
 
 _del() {
-	
+	echo 1	
 }
 
 _sy() {
-	
+	echo 2
 }
 
 _ls() {
-	[ -z "$@" ] && { awk '{ print $1 }' "$_DB" | sort | uniq } || {
-		
+	[[ -z "$@" ]] && { awk '{ print $1 }' "$_DB" | sort | uniq; } || {
+		echo 3
 	}
 }
 
@@ -68,12 +71,10 @@ _ls() {
 
 [ ! "$1" ] && _help
 
-while getopts "i:r:u:l" cmd; do
-	case "$cmd" in
-		"i") _add $@;;
-		"r") _del $@;;
-		"u") _sy $OPTARG;;
-		"l") _ls $OPTARG;;
-		*) _help;;
-	esac
-done
+case "$1" in
+	"-i") shift; _add $@;;
+	"-r") shift; _del $@;;
+	"-u") shift; _sy $@;;
+	"-l") shift; _ls $@;;
+	*) _help;;
+esac
