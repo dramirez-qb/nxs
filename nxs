@@ -23,26 +23,34 @@
 
 _DB=".apps/.nxdb"
 _APPS_DIR=".apps"
+_NXDB="https://github.com/some/location/nxdb"
 
 
 # - - - 		FORMAT OUTPUT
 
-_fail() { echo -e "\n - - \033[38;5;1m $@ \n"; }
+_fail() { echo -e "- \033[38;5;1m $@"; }
 
-_echo() { echo -e "\n - - \033[38;5;5m $@ \n"; }
+_echo() { echo -e "- \033[38;5;5m $@"; }
 
 
 # - - - 		MAIN FUNCTIONS
 
-_help() { _echo "USAGE: nxs - [s] [r] [u] [l] PKG"; }
+_help() {
+ _echo "USAGE: nxs [cmd]
+	[install]	: Install specified package(s).
+	[remove]	: Uninstall specified package(s).
+	[update]	: Update specified package(s). If no package is supplied, all packages are updated.
+	[find]		: Find pakcages matching a given pattern."
+	exit
+}
 
 _add() {
 	for pkg in "$@"; do
 		target=$(grep "$pkg" "$_DB")
-		[[ -z "$target" ]] && { _echo "The name '$pkg' is not valid. Exiting"; exit; }
+		[[ -z "$target" ]] && { _echo "The name '$pkg' is not valid. Exiting"; }
 		app="${target/ */}"
-		echo $app
-		wget $target -O "${_APPS_DIR}/${app}.ai"
+		target="${target/* /}"
+		wget -nv $target -qO "${_APPS_DIR}/${app}.x"
 	done
 }
 
@@ -55,22 +63,28 @@ _sy() {
 }
 
 _ls() {
-	[[ -z "$@" ]] && { awk '{ print $1 }' "$_DB" | sort | uniq; } || {
-		echo 3
-	}
+	if [[ -z "$@" ]]; then
+		awk '{ print $1 }' "$_DB" | sort | uniq
+	else
+		awk '{ print $1 }' "$_DB" | grep "$@" | sort | uniq
+	fi
 }
 
 
-# - - - 		PARSE COMMAND LINE
+# - - - 		MAIN PROGRAM
+
+mkdir -p "$_APPS_DIR"
+[ -f "$_DB" ] || wget "$_NXDB" -qO "$_DB"
 
 [ ! "$1" ] && _help
 
 cmd=`tr [:upper:] [:lower:] <<< $1`
 
+shift
 case "$cmd" in
-	"install") shift; _add $@;;
-	"remove") shift; _del $@;;
-	"update") shift; _sy $@;;
-	"list") shift; _ls $@;;
-	*) _help;;
+	"install")	_add $@;;
+	"remove")	_del $@;;
+	"update")	_sy $@;;
+	"find")		_ls $@;;
+	*)			_help;;
 esac
