@@ -42,7 +42,7 @@ _add() {
 		[[ -z "$target" ]] && { _echo "The name '$pkg' is not valid. Exiting"; exit; }
 		app="${target/ */}"
 		echo $app
-#		wget $target -O "${_APPS_DIR}/${app}.ai"
+		wget $target -O "${_APPS_DIR}/${app}.ai"
 	done
 }
 
