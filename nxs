@@ -1,4 +1,4 @@
-#! /bin/sh
+#! /bin/bash
 
 # Luis Lavaire 2017, @Nitrux S.A.
 
@@ -45,22 +45,23 @@ _help() {
 }
 
 _install() {
-	target="${target/ /-}"
-	app="${target/ */}"
-	target="${target/* /}"
+	app="$1"
 	_echo "Installing ${app}..."
 	wget $target -qO "${_APPS_DIR}/${app}.x"
 	chmod a+x "${_APPS_DIR}/${app}.x"
 }
 
 _add() {
+	[ -z "$1" ] && _help
 	for pkg in "$@"; do
-		target=($(awk "/$pkg/ { print \$1,\$2 }" "$_DB"))
 
-		if [[ `wc -l <<< "$target"` -ge 1 ]]; then
-			for  in "${target[@]}"; do
-				app="$"
-				ver="$"
+		pkg=($(awk "/$pkg/ { print \$1,\$2;}" "$_DB" | tr "" "-"))
+
+		if [[  -ge 1 ]]; then
+			
+			for  in "${pkg[@]}"; do
+				app="${}"
+				ver="${}"
 				_install "$app" "$ver"
 			done
 		else
@@ -91,7 +92,6 @@ _ls() {
 
 mkdir -p "$_APPS_DIR"
 [ -f "$_DB" ] || wget "$_NXDB" -qO "$_DB"
-[ ! "$1" ] && _help
 cmd=`tr [:upper:] [:lower:] <<< $1`
 
 shift
