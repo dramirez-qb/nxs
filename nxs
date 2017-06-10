@@ -28,45 +28,46 @@ _NXDB="https://github.com/some/location/nxdb"
 
 # - - - 		FORMAT OUTPUT
 
-_fail() { echo -e "- \033[38;5;1m $@"; }
+_fail() { echo -e "-\033[38;5;1m $@ \033[38;0;1m"; }
 
-_echo() { echo -e "- \033[38;5;5m $@"; }
+_echo() { echo -e "-\033[38;5;5m $@ \033[38;0;1m"; }
 
 
 # - - - 		MAIN FUNCTIONS
 
 _help() {
- _echo "USAGE: nxs [cmd]
-	[install]	: Install specified package(s).
-	[remove]	: Uninstall specified package(s).
-	[update]	: Update specified package(s). If no package is supplied, all packages are updated.
-	[find]		: Find pakcages matching a given pattern."
+	_fail "USAGE: nxs [cmd]"
+
+	echo "  [install] : Install specified package(s).
+  [remove]  : Uninstall specified package(s).
+  [update]  : Update specified package(s).
+              If no package is supplied, all packages are updated.
+  [find]    : Find pakcages matching a given pattern."
 	exit
 }
 
+app=''
+ver=''
+
 _install() {
-	app="$1"
-	_echo "Installing ${app}..."
-	wget $target -qO "${_APPS_DIR}/${app}.x"
-	chmod a+x "${_APPS_DIR}/${app}.x"
+	target=`grep "${app} ${ver}" "$_DB" | awk '{ print $3 }'`
+	file="${app}-${ver}.x"
+	_echo "Installing $file..."
+	wget --quiet --show-progress  "$target" -O "$_APPS_DIR/$file"
+	chmod a+x "$_APPS_DIR/$file"
 }
 
 _add() {
 	[ -z "$1" ] && _help
 	for pkg in "$@"; do
-
-		pkg=($(awk "/$pkg/ { print \$1,\$2;}" "$_DB" | tr "" "-"))
-
-		if [[  -ge 1 ]]; then
-			
-			for  in "${pkg[@]}"; do
-				app="${}"
-				ver="${}"
-				_install "$app" "$ver"
-			done
-		else
-			_echo "The name '$pkg' is not valid. Exiting"
-		fi
+		name="$pkg"
+		pkg=($(awk "/$pkg/ { print \$1,\$2;}" "$_DB"))
+		[[ "$pkg" ]] || _echo "The package '$name' doesn't exist. Omitting"
+		while [[ "${#pkg[@]}" -gt 0 ]]; do
+			app="$pkg"; pkg=( "${pkg[@]:1}" )
+			ver="$pkg"; pkg=( "${pkg[@]:1}" )
+			_install
+		done
 	done
 	_echo "Done installing apps."
 }
@@ -83,7 +84,7 @@ _ls() {
 	if [[ -z "$@" ]]; then
 		awk '{ print $1 }' "$_DB" | sort | uniq
 	else
-		awk '{ print $1 }' "$_DB" | grep "$@" | sort | uniq
+		awk '{ print $1,$2 }' "$_DB" | grep "$@" | sort | uniq
 	fi
 }
 
