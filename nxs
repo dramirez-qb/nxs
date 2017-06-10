@@ -38,11 +38,13 @@ _echo() { echo -e "-\033[38;5;5m $@ \033[38;0;1m"; }
 _help() {
 	_fail "USAGE: nxs [cmd]"
 
-	echo "  [install] : Install specified package(s).
+	echo "
+  [install] : Install specified package(s).
   [remove]  : Uninstall specified package(s).
   [update]  : Update specified package(s).
               If no package is supplied, all packages are updated.
   [find]    : Find pakcages matching a given pattern."
+
 	exit
 }
 
@@ -63,10 +65,17 @@ _add() {
 		name="$pkg"
 		pkg=($(awk "/$pkg/ { print \$1,\$2;}" "$_DB"))
 		[[ "$pkg" ]] || _echo "The package '$name' doesn't exist. Omitting"
+
+		# TODO:
+		# Need to handle multiple versions. Show them
+		# to the user (if there are multiple versions,
+		# of course) and let him select which one he
+		# wants to install.
+
 		while [[ "${#pkg[@]}" -gt 0 ]]; do
 			app="$pkg"; pkg=( "${pkg[@]:1}" )
 			ver="$pkg"; pkg=( "${pkg[@]:1}" )
-			_install
+			echo "${app}-${ver}"
 		done
 	done
 	_echo "Done installing apps."
