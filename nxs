@@ -17,7 +17,7 @@
 #
 # Very easy, very funny. =D
 
-# - - - 		CONFIG FILES
+# - - - CONFIG FILES
 
 # ${HOME}/.apps
 
@@ -26,14 +26,14 @@ _APPS_DIR=".apps"
 _NXDB="https://github.com/some/location/nxdb"
 
 
-# - - - 		FORMAT OUTPUT
+# - - - OUTPUTS
 
 _fail() { echo -e "-\033[38;5;1m $@ \033[38;0;1m"; }
 
 _echo() { echo -e "-\033[38;5;5m $@ \033[38;0;1m"; }
 
 
-# - - - 		MAIN FUNCTIONS
+# - - - MAIN FUNCTIONS
 
 _help() {
 	_fail "USAGE: nxs [cmd]"
@@ -98,7 +98,7 @@ _ls() {
 }
 
 
-# - - - 		MAIN PROGRAM
+# - - - MAIN PROGRAM
 
 mkdir -p "$_APPS_DIR"
 [ -f "$_DB" ] || wget "$_NXDB" -qO "$_DB"
