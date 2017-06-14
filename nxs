@@ -23,14 +23,14 @@
 
 _DB=".apps/.nxdb"
 _APPS_DIR=".apps"
-_NXDB="https://github.com/some/location/nxdb"
+_NXDB="https://github.com/Nitrux/nxdb"
 
 
 # - - - OUTPUTS
 
-_fail() { echo -e "-\033[38;5;1m $@ \033[38;0;1m"; }
+_fail() { printf "\033[38;5;1m${@}\033[38;0;1m"; }
 
-_echo() { echo -e "-\033[38;5;5m $@ \033[38;0;1m"; }
+_echo() { printf "\033[38;5;5m${@}\033[38;0;1m"; }
 
 
 # - - - MAIN FUNCTIONS
@@ -50,39 +50,65 @@ _help() {
 
 app=''
 ver=''
+pkg=''
 
 _install() {
+	[[ -z "${ver}" ]] && _fail "Version not found! \n" && exit 1
+	[[ -z "${app}" ]] && _fail "Application not found! \n" && exit 1
+
 	target=`grep "${app} ${ver}" "$_DB" | awk '{ print $3 }'`
 	file="${app}-${ver}.x"
-	_echo "Installing $file..."
-	wget --quiet --show-progress  "$target" -O "$_APPS_DIR/$file"
+	_echo "Installing $file ..."
+	wget --quiet --show-progress "$target" -O "$_APPS_DIR/$file"
 	chmod a+x "$_APPS_DIR/$file"
 }
 
 _add() {
 	[ -z "$1" ] && _help
 	for pkg in "$@"; do
-		name="$pkg"
-		pkg=($(awk "/$pkg/ { print \$1,\$2;}" "$_DB"))
-		[[ "$pkg" ]] || _echo "The package '$name' doesn't exist. Omitting"
+		_app=($(awk "/$pkg/ { print \$1;}" "$_DB"))
+		_ver=($(awk "/$pkg/ { print \$2;}" "$_DB"))
 
-		# TODO:
-		# Need to handle multiple versions. Show them
-		# to the user (if there are multiple versions,
-		# of course) and let him select which one he
-		# wants to install.
-
-		while [[ "${#pkg[@]}" -gt 0 ]]; do
-			app="$pkg"; pkg=( "${pkg[@]:1}" )
-			ver="$pkg"; pkg=( "${pkg[@]:1}" )
-			echo "${app}-${ver}"
-		done
+		if [[ "${#_app[@]}" -gt 1 ]]; then
+			echo -en "\nType wich version(s) of `_fail $_app` you want to install\nseparated by spaces:\n\n"
+			for (( c=0; c<${#_ver[@]}; c++ )); do
+				_echo "[$c] ${_ver[$c]}\n"
+			done
+			_fail "\n :: "; read -a vers
+			for a in "${vers[@]}"; do
+				app="$_app"
+				ver="${_ver[$a]}"
+				_install
+			done
+		else
+			app="${_app}"
+			ver="${_ver}"
+			_install
+		fi
 	done
-	_echo "Done installing apps."
+	_echo "Done installing apps. \n"
 }
 
 _del() {
-	echo 1
+	[ -z "$1" ] && _help
+	for pkg in "$@"; do
+		_app=(`find "$_APPS_DIR" -name "$pkg"`)
+		if [[ "${#_app[@]}" -gt 1 ]]; then
+			echo -en "\nType wich version(s) of `_fail $_app` you want to remove\nseparated by spaces:\n\n"
+			for (( c=0; c<${#_ver[@]}; c++ )); do
+				_echo "[$c] ${_ver[$c]}\n"
+			done
+			_fail "\n :: "; read -a vers
+			for a in "${vers[@]}"; do
+				app="$_app"
+				ver="${_ver[$a]}"
+				_remove
+			done
+		else
+			rm "$_app"
+		fi
+	done
+	_fail "Done removing apps. \n"
 }
 
 _sy() {
@@ -101,10 +127,15 @@ _ls() {
 # - - - MAIN PROGRAM
 
 mkdir -p "$_APPS_DIR"
+
 [ -f "$_DB" ] || wget "$_NXDB" -qO "$_DB"
+
 cmd=`tr [:upper:] [:lower:] <<< $1`
 
 shift
+
+echo ""
+
 case "$cmd" in
 	"install")	_add $@;;
 	"remove")	_del $@;;
