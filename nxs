@@ -2,126 +2,29 @@
 
 # Luis Lavaire 2017, @Nitrux S.A.
 
-# nxs is a simple software installer designed to manage
-# AppImage packages. When install is requested, it looks
-# for the requested package in local database, and, if
-# found, then it installs it (downloads) in 
-# $HOME/.local/apps.
+# The real locations could be this ones:
 #
-# When deletion is requested, it looks if the app exists
-# in the apps directory and if so, it just deletes it.
-#
-# It can update all the packages installed to the latest
-# version available also. List the ones installed or
-# available for installation is supported too.
-#
-# Very easy, very funny. =D
+# 	${HOME}/.local/apps*
+# 	/apps/*
 
-# - - - CONFIG FILES
+export _APPS_DIR=".apps"				# Installation dir
+export _DB="$_APPS_DIR/.nxdb"			# Packages database
+export _APPS="$_APPS_DIR/.installed"	# Installed apps
 
-# ${HOME}/.apps
+_NXDB="https://raw.githubusercontent.com/Nitrux/nxs/master/nxdb"
 
-_DB=".apps/.nxdb"
-_APPS_DIR=".apps"
-_NXDB="https://github.com/Nitrux/nxdb"
-
-
-# - - - OUTPUTS
-
-_fail() { printf "\033[38;5;1m${@}\033[38;0;1m"; }
-
-_echo() { printf "\033[38;5;5m${@}\033[38;0;1m"; }
-
-
-# - - - MAIN FUNCTIONS
+_fail() { printf "\033[38;5;1m${@}\033[38;0;1m\n"; }
+_echo() { printf "\033[38;5;5m${@}\033[38;0;1m\n"; }
 
 _help() {
-	_fail "USAGE: nxs [cmd]"
-
-	echo "
-  [install] : Install specified package(s).
-  [remove]  : Uninstall specified package(s).
-  [update]  : Update specified package(s).
-              If no package is supplied, all packages are updated.
-  [find]    : Find pakcages matching a given pattern."
-
+	_fail "USAGE: nxs [cmd] PKG"
+	_echo "[cmd]: install | remove | update | find"
 	exit
 }
 
-app=''
-ver=''
-pkg=''
-
-_install() {
-	[[ -z "${ver}" ]] && _fail "Version not found! \n" && exit 1
-	[[ -z "${app}" ]] && _fail "Application not found! \n" && exit 1
-
-	target=`grep "${app} ${ver}" "$_DB" | awk '{ print $3 }'`
-	file="${app}-${ver}.x"
-	_echo "Installing $file ..."
-	wget --quiet --show-progress "$target" -O "$_APPS_DIR/$file"
-	chmod a+x "$_APPS_DIR/$file"
-}
-
-_add() {
-	[ -z "$1" ] && _help
-	for pkg in "$@"; do
-		_app=($(awk "/$pkg/ { print \$1;}" "$_DB"))
-		_ver=($(awk "/$pkg/ { print \$2;}" "$_DB"))
-
-		if [[ "${#_app[@]}" -gt 1 ]]; then
-			echo -en "\nType wich version(s) of `_fail $_app` you want to install\nseparated by spaces:\n\n"
-			for (( c=0; c<${#_ver[@]}; c++ )); do
-				_echo "[$c] ${_ver[$c]}\n"
-			done
-			_fail "\n :: "; read -a vers
-			for a in "${vers[@]}"; do
-				app="$_app"
-				ver="${_ver[$a]}"
-				_install
-			done
-		else
-			app="${_app}"
-			ver="${_ver}"
-			_install
-		fi
-	done
-	_echo "Done installing apps. \n"
-}
-
-_del() {
-	[ -z "$1" ] && _help
-	for pkg in "$@"; do
-		_app=(`find "$_APPS_DIR" -name "$pkg"`)
-		if [[ "${#_app[@]}" -gt 1 ]]; then
-			echo -en "\nType wich version(s) of `_fail $_app` you want to remove\nseparated by spaces:\n\n"
-			for (( c=0; c<${#_ver[@]}; c++ )); do
-				_echo "[$c] ${_ver[$c]}\n"
-			done
-			_fail "\n :: "; read -a vers
-			for a in "${vers[@]}"; do
-				app="$_app"
-				ver="${_ver[$a]}"
-				_remove
-			done
-		else
-			rm "$_app"
-		fi
-	done
-	_fail "Done removing apps. \n"
-}
-
-_sy() {
-	echo 2
-}
-
-_ls() {
-	if [[ -z "$@" ]]; then
-		awk '{ print $1 }' "$_DB" | sort | uniq
-	else
-		awk '{ print $1,$2 }' "$_DB" | grep "$@" | sort | uniq
-	fi
-}
+export -f _fail
+export -f _echo
+export -f _help
 
 
 # - - - MAIN PROGRAM
@@ -133,13 +36,11 @@ mkdir -p "$_APPS_DIR"
 cmd=`tr [:upper:] [:lower:] <<< $1`
 
 shift
-
-echo ""
-
 case "$cmd" in
-	"install")	_add $@;;
-	"remove")	_del $@;;
-	"update")	_sy $@;;
-	"find")		_ls $@;;
+	"install")	./add $@;;
+	"remove")	./del $@;;
+	"find")		./fnd $@;;
 	*)			_help;;
 esac
+
+echo

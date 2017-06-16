@@ -1,0 +1,9 @@
+#! /bin/bash
+
+[ -z "$1" ] && _help
+
+for pkg in "$@"; do
+	awk "/$pkg/ { print \$2, \$3 }" "$_APPS"
+done
+
+_fail "Done removing apps."
