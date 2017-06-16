@@ -1,12 +1,14 @@
 #! /bin/bash
 
+[ -z "$1" ] && _help
+
 get-pkg() {
 	[[ -z "${ver}" ]] && _fail "Wrong version! Skipping." && return
 	[[ -z "${app}" ]] && _fail "Application not found!" && exit 1
 
 	target=`grep "${app} ${ver}" "$_DB" | awk '{ print $3 }'`
 	file="${app}-${ver}.nx"
-	echo "Downloading $file ..."
+	_echo "Downloading $file"
 	wget -q -nv --show-progress "$target" -O "$_APPS_DIR/$file"
 	chmod a+x "$_APPS_DIR/$file"
 
@@ -15,11 +17,9 @@ get-pkg() {
 	fi
 }
 
-[ -z "$1" ] && _help
-
 for pkg in "$@"; do
-	_app=($(awk "/$pkg/ { print \$1;}" "$_DB"))
-	_ver=($(awk "/$pkg/ { print \$2;}" "$_DB"))
+	_app=($(awk "/$pkg/ { print \$1 }" "$_DB"))
+	_ver=($(awk "/$pkg/ { print \$2 }" "$_DB"))
 
 	if [[ "${#_app[@]}" -gt 1 ]]; then
 		_echo "\nType wich version(s) of $pkg you want to install separated by spaces:\n"
@@ -27,15 +27,15 @@ for pkg in "$@"; do
 			_echo "[$c] ${_ver[$c]}"
 		done
 
-		read -p " :: " -a vers
+		read -p " :: " -a user
 
-		for a in "${vers[@]}"; do
-			app="$_app"
+		for a in "${user[@]}"; do
+			app="$pkg"
 			ver="${_ver[$a]}"
 			get-pkg
 		done
 	else
-		app="${_app}"
+		app="$pkg"
 		ver="${_ver}"
 		get-pkg
 	fi

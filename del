@@ -2,8 +2,34 @@
 
 [ -z "$1" ] && _help
 
+delete-pkg() {
+#	rm $pkg
+#	sed -i "/$app $ver/d"
+	
+}
+
 for pkg in "$@"; do
-	awk "/$pkg/ { print \$2, \$3 }" "$_APPS"
+	_app=($(awk "/$pkg/ { print \$1 }" "$_APPS"))
+	_ver=($(awk "/$pkg/ { print \$2 }" "$_APPS"))
+
+	if [[ "${#_app[@]}" -gt 1 ]]; then
+		_echo "\nType wich version(s) of $pkg you want to remove separated by spaces:\n"
+		for (( c=0; c<${#_ver[@]}; c++ )); do
+			_echo "[$c] ${_ver[$c]}"
+		done
+
+		read -p " :: " -a user
+
+		for a in "${user[@]}"; do
+			app="$pkg"
+			ver="${_ver[$a]}"
+			delete-pkg
+		done
+	else
+		app="$pkg"
+		ver="${_ver}"
+		delete-pkg
+	fi
 done
 
-_fail "Done removing apps."
+_echo "Done removing apps."
