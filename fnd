@@ -3,5 +3,5 @@
 if [[ -z "$@" ]]; then
 	awk '{ print $1 }' "$_DB" | sort | uniq
 else
-	awk '{ print $1,$2 }' "$_DB" | grep "$@" | sort | uniq
+	awk '{ print $1, $2 }' "$_DB" | grep "$@" | sort | uniq
 fi
